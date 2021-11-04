@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>武林歪传</title>
+    <link rel="shortcut icon" href="./image/demo.jpg">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+    <div id="app">
+        <Left></Left>
+        <Centers></Centers>
+        <!-- 舞剑 -->
+        <Right></Right>
+    </div>
+    <!-- 左边 -->
+    <template id="Left">
+        <div class="L">
+                <!-- 确保每次点击人物都可以进行舞剑特效 -->
+                <div id="btnL" :class="{imgL:atnl,imgsL:atnls}"></div>
+                <div class="bloodL"></div>
+                <button @click="atnl=!atnl,LG()">攻击</button>
+        </div>
+    </template>
+    <!-- 中间 -->
+    <template id="Centers">
+        <div class="C">
+           <div class="Ll">
+                <span class="SS"></span>
+           </div>
+           <div class="Cc">
+               <div class="cc"></div>
+               <button class="CX" @click="CXJZ">重新开始</button>
+           </div>
+           <div class="Rr">
+                <span class="SSS"></span>
+           </div>
+        </div>
+    </template>
+    <!-- 右边 -->
+    <template id="Right">
+        <div class="R">
+            <!-- 确保每次点击人物都可以进行舞剑特效 -->
+            <div id="btnR" :class="{imgR:atn,imgsR:atns}"></div>
+            <div class="bloodR"></div>
+            <button @click="atn=!atn,RG()">攻击</button>
+        </div>
+    </template>
+    <script src="./js/vue.js"></script>
+    <script>
+        var bus = new Vue();
+        Vue.component('Left', {
+            data() {
+                return {
+                        atnl: false,
+                        atnls:true,
+                        Lnum:100
+                }
+            },
+            methods:{
+                LG(){
+                    // 借此来设置掉血量
+                    var numdsf = Math.floor((Math.random()*101)-1);
+                    // if判断是用来调节掉血的随机占比概率
+                    if(numdsf>=1&&numdsf<=70){
+                        var i = Math.floor((Math.random()*11));
+                    }else if(numdsf>=71&&numdsf<=85){
+                        var i = Math.floor((Math.random()*10)+20);
+                    }else if(numdsf=>86&&numdsf<=95){
+                        var i = Math.floor((Math.random()*20)+35);
+                    }else if(numdsf>=95&&numdsf<=100){
+                        var i =Math.floor((Math.random()*50)+50);
+                    }
+                    // console.log(i);
+                    var thats=this.Lnum
+                    this.Lnum-=i;
+                    //传递伤害数值
+                    bus.$emit('breadL',i);
+                    //判断是否死亡
+                    bus.$emit('ZX',this.Lnum)
+                    //为了抢先一步显示血管血消失
+                    bus.$emit('XS',this.Lnum)
+                    var span=document.querySelector("span");
+                    if(thats-this.Lnum<0){
+                        thats=thats-this.Lnum
+                    }
+                    if(this.Lnum<0){
+                        span.innerHTML+="<p>游戏结束</p>";
+                        var btn=document.querySelector("button");
+                        btn.style.display="none"
+                    }else if(thats-this.Lnum===0){
+                        //如果是0就显示对方已经闪避了
+                        span.innerHTML+="<p>您对对方造成的攻击已被对方闪避</p>";
+                    }else{
+                        //如果造成真实伤害了那就输出出造成的伤害数值
+                        span.innerHTML+="<p>您对对方造成了"+(thats-this.Lnum)+"点伤害</p>";
+                    }
+                }
+            },
+            mounted(){
+                var that=this
+                bus.$on('breadR',function(val){
+                        var span=document.querySelector("span");
+                        if(val===0){
+                            //如果是0的时候就显示躲避了对方的攻击
+                            span.innerHTML+="<p>您已闪避对方的伤害攻击</p>"
+                        }else{
+                            //不是0 就正常显示受到攻击所掉的血
+                            span.innerHTML+="<p>您受到了"+val+"点伤害</p>"
+                        }
+                        bus.$on('XSS',function(valL){
+                            var blL=document.querySelector('.bloodL')
+                            if(valL<0){
+                                valL=0
+                            }
+                            blL.style.backgroundSize=""+valL+"% 100%"
+                        })
+                })
+            },
+            template: '#Left',
+        })
+        Vue.component('Centers', {
+            template: '#Centers',
+            methods:{
+                CXJZ(){
+                    location.reload();
+                }
+            },
+            mounted(){
+                //中间部分的文字滚动
+
+                //设置文字
+                var str=`少年叶凡-神武觉醒 作者：百里玺 正文开始··· ···神武大陆亿万里江山，峰峦叠嶂，川河如画。自太古时代以来，无数古神在这片神奇的大陆诞生和湮灭。古神湮灭之后，以人、兽、鬼、灵四大种族为首的亿万生灵，在这片大陆渐渐兴盛，不断繁衍壮大，形成四族共居神武大陆的局面。四族之中，圣神级强者取代了湮灭的上古神灵，在神武大陆的星空建起了一片宏伟的星尘护壁。在宛若天幕的星尘护壁见证下，众圣神授疆图，神武大陆割地布五州，共立“东州人族紫玄皇朝、南州兽族联盟、西州幽冥皇朝、北州灵族契约”四大种族。另有中州为四族征战之地。四族在神武大陆历经数百万年的争斗，始终无法分出高下，故定下《千年战和条约》。`
+                //下面写定时器
+                var Cc=document.querySelector('.cc')
+                var i=0;
+                var hello=setInterval(() => {
+                    //当文字全部加载完成时关闭定时器
+                    if(i==str.length){
+                    clearInterval(hello);
+                    }
+                    Cc.innerHTML=str.slice(0,i++);
+                }, 300);
+            }
+        })
+        Vue.component('Right', {
+            data() {
+                return {
+                        atn: false,
+                        atns:true,
+                        Rnum:100
+                }
+            },
+            methods:{
+                RG(){
+                    // 借此来设置掉血量
+                    var numdsf = Math.floor((Math.random()*101)-1);
+                    // if判断是用来调节掉血的随机占比概率
+                    if(numdsf>=1&&numdsf<=70){
+                        var i = Math.floor((Math.random()*11));
+                    }else if(numdsf>=71&&numdsf<=85){
+                        var i = Math.floor((Math.random()*10)+20);
+                    }else if(numdsf=>86&&numdsf<=95){
+                        var i = Math.floor((Math.random()*20)+35);
+                    }else if(numdsf>=95&&numdsf<=100){
+                        var i =Math.floor((Math.random()*50)+50);
+                    }
+                    // console.log(i);
+                    var thats=this.Rnum
+                    this.Rnum-=i;
+                    bus.$emit('breadR',i);
+                    bus.$emit('XSS',this.Rnum)
+                    var span=document.querySelectorAll("span");
+                    if(thats-this.Rnum<0){
+                        thats=thats-this.Rnum
+                    }
+                   //用右边的攻击数来判断左边的是否死亡
+                    if(this.Rnum<0){
+                        span[1].innerHTML+="<p>游戏结束</p>";
+                        span[0].innerHTML+="<p>您已阵亡</p>";
+                        var btn=document.querySelectorAll("button");
+                        btn[0].style.display="none"
+                        btn[2].style.display="none"
+                    }else if(thats-this.Rnum===0){
+                        //如果是0就显示对方已经闪避了
+                        span[1].innerHTML+="<p>您对对方造成的攻击已被对方闪避</p>";
+                    }else{
+                        //如果没死就显示掉了多少血
+                        span[1].innerHTML+="<p>您对对方造成了"+(thats-this.Rnum)+"点伤害</p>";
+                    }
+                },
+            },
+            mounted(){
+                var that=this
+                var span=document.querySelectorAll("span");
+                bus.$on('breadL',function(val){
+                    if(val===0){
+                        //如果是0就显示闪避了对方的伤害
+                        span[1].innerHTML+="<p>您已闪避对方的伤害攻击</p>" 
+                    }else{
+                        //用以设置受到了多少的伤害
+                        span[1].innerHTML+="<p>您受到了"+val+"点伤害</p>" 
+                    }
+                    //设置血管显示比
+                    bus.$on('XS',function(vall){
+                        var blR=document.querySelector('.bloodR')
+                        if(vall<0){
+                            vall=0;
+                        }
+                        blR.style.backgroundSize=""+vall+"% 100%";
+                    })
+                    
+                })
+                //判断左边的攻击数，然后判断右边的死亡
+                bus.$on('ZX',function(vale){
+                    if(vale<=0){
+                    span[1].innerHTML+="<p>您已阵亡</p>"
+                    var btn=document.querySelectorAll('button');
+                    btn[2].style.display="none"
+                }
+                })
+            },
+            template: '#Right',
+        })
+        new Vue({
+            el: '#app',
+            methods: {
+                
+            },
+        })
+    </script>
+</body>
+
+</html>
